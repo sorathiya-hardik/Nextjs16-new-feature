@@ -2,6 +2,9 @@
 
 A comprehensive demonstration of Next.js 16's latest features and improvements, built with React 19, TypeScript, and Tailwind CSS.
 
+## Live Demo
+[Live Demo](https://nextjs16-new-feature.vercel.app)
+
 ## 🚀 Features Covered
 
 ### 1. **Cache Components** (`"use cache"` directive)
