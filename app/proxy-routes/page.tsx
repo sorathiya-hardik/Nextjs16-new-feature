@@ -63,18 +63,6 @@ export default function ProxyRoutesPage() {
               <li>Logic stays the same - only naming changes</li>
             </ol>
           </div>
-
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-            <p className="text-sm text-yellow-900">
-              <strong>⚠️ Note:</strong>{" "}
-              <code className="bg-yellow-100 px-2 py-1 rounded">
-                middleware.ts
-              </code>{" "}
-              is still available for Edge runtime use cases, but it is{" "}
-              <strong>deprecated</strong> and will be removed in a future
-              version.
-            </p>
-          </div>
         </div>
 
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
@@ -123,24 +111,10 @@ export default function ProxyRoutesPage() {
             </div>
             <div className="bg-white rounded p-4">
               <p className="font-semibold text-gray-900 mb-1">
-                🌐 Localization
-              </p>
-              <p className="text-gray-700">
-                Detect user locale and redirect to appropriate language version
-              </p>
-            </div>
-            <div className="bg-white rounded p-4">
-              <p className="font-semibold text-gray-900 mb-1">
                 📋 Custom Headers
               </p>
               <p className="text-gray-700">
                 Add security headers, CORS, or custom metadata to responses
-              </p>
-            </div>
-            <div className="bg-white rounded p-4">
-              <p className="font-semibold text-gray-900 mb-1">🔧 A/B Testing</p>
-              <p className="text-gray-700">
-                Route users to different page variants for experiments
               </p>
             </div>
           </div>

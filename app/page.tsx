@@ -62,7 +62,7 @@ export default function Home() {
             <Link
               key={feature.href}
               href={feature.href}
-              className="block bg-gray-50 border border-gray-200 border border-gray-200 rounded-lg p-6 hover:border-gray-400 transition"
+              className="block bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-gray-400 transition"
             >
               <div className="text-3xl mb-3">{feature.icon}</div>
               <h2 className="text-lg font-bold text-gray-900 mb-2">
@@ -73,7 +73,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="bg-gray-50 border border-gray-200 border border-gray-200 rounded-lg p-6 mt-8">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mt-8">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             Why Next.js 16?
           </h3>
