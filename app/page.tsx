@@ -20,6 +20,12 @@ export default function Home() {
       description: "New APIs for better cache control and management",
     },
     {
+      href: "/partial-pre-rendering",
+      icon: "🎯",
+      title: "Partial Pre-Rendering",
+      description: "Mix static and dynamic content for optimal performance",
+    },
+    {
       href: "/proxy-routes",
       icon: "🔀",
       title: "proxy.ts",
