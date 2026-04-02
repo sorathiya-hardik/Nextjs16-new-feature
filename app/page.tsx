@@ -5,6 +5,9 @@
 
 import Link from "next/link";
 
+// Unused variable for testing Copilot PR review
+const UNUSED_TEST_VARIABLE = "This is intentionally unused for testing";
+
 export default function Home() {
   const features = [
     {
