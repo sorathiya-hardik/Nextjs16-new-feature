@@ -37,11 +37,11 @@ export default function ComparisonPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-200">
               <tr>
                 <td className="px-6 py-4 font-medium text-gray-900">Bundler</td>
                 <td className="px-6 py-4 text-gray-600">Webpack (default)</td>
-                <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">
+                <td className="px-6 py-4 text-green-600 font-semibold">
                   Turbopack (default) ⚡
                 </td>
               </tr>
@@ -50,7 +50,7 @@ export default function ComparisonPage() {
                   React Version
                 </td>
                 <td className="px-6 py-4 text-gray-600">React 18</td>
-                <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">
+                <td className="px-6 py-4 text-green-600 font-semibold">
                   React 19 ⚛️
                 </td>
               </tr>
@@ -59,14 +59,14 @@ export default function ComparisonPage() {
                   Caching API
                 </td>
                 <td className="px-6 py-4 text-gray-600">Basic caching</td>
-                <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">
+                <td className="px-6 py-4 text-green-600 font-semibold">
                   Refined APIs 📦
                 </td>
               </tr>
               <tr>
                 <td className="px-6 py-4 font-medium text-gray-900">Routing</td>
                 <td className="px-6 py-4 text-gray-600">App Router</td>
-                <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">
+                <td className="px-6 py-4 text-green-600 font-semibold">
                   Smarter Routing 🧭
                 </td>
               </tr>
@@ -75,14 +75,14 @@ export default function ComparisonPage() {
                   Build Speed
                 </td>
                 <td className="px-6 py-4 text-gray-600">~3.2s</td>
-                <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">
+                <td className="px-6 py-4 text-green-600 font-semibold">
                   ~0.6s (5x faster) 🚀
                 </td>
               </tr>
               <tr>
                 <td className="px-6 py-4 font-medium text-gray-900">Logging</td>
                 <td className="px-6 py-4 text-gray-600">Standard</td>
-                <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">
+                <td className="px-6 py-4 text-green-600 font-semibold">
                   Enhanced Metrics 📊
                 </td>
               </tr>
