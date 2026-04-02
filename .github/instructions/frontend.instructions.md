@@ -1,66 +1,67 @@
 ---
-description: "Use when writing React components and pages in src/app/**/*.tsx. Provides Next.js framework-specific rules for page components, layouts, and client/server boundary patterns."
+description: "Use when writing React page components and layouts in app/**/*.tsx. Provides Next.js 16-specific rules for page structure, layout composition, caching, and client/server boundaries."
 name: "Frontend App Pages"
-applyTo: "src/app/**/*.tsx"
+applyTo: "app/**/*.tsx"
 ---
 
-# Frontend Component Guidelines
+# Frontend App Page Guidelines
 
-Rules specific to React components in the `src/components/` directory. These rules extend and override general workspace instructions when working on component files.
+Rules specific to Next.js page components and layouts in the `app/` directory. These rules extend and override general workspace instructions when working on page files.
 
-## Component Architecture
+## Page Component Structure
 
-- **Composition over inheritance**: Build components by combining smaller, focused components
-- **Single Responsibility Principle**: Each component should have one clear purpose
-- **Props interface**: Always define a `Props` interface for component parameters
-  ```typescript
-  interface Props {
-    children?: React.ReactNode;
-    className?: string;
-    // other props
-  }
-  ```
-- **Avoid prop drilling**: Use React Context for deeply nested prop passing
-- **Memoization**: Use `React.memo` or `useMemo` for expensive computations only when profiler confirms necessity
-
-## State Management
-
-- Prefer local state with `useState` for component-level UI state
-- Lift state to parent/context when multiple components need it
-- Avoid Redux/Zustand unless data is truly global application state
-- Keep derived state calculated on render—don't store it separately
-- Use `useCallback` and `useReducer` sparingly (profile first)
-
-## Client vs Server Component Split
-
-- Mark interactive components with `"use client"`
-- Keep data fetching in server components and pass as props
-- Server components are the default—only add `"use client"` when needed
-- Never use client-only hooks in server components
-- Example split pattern:
+- **Default exports**: Page components should use default export (e.g., `export default function Page()`)
+- **Layout hierarchy**: Use nested folders to organize pages; auto-nesting works with layouts
+- **Server by default**: Page components are server components unless marked with `"use client"`
+- **Data fetching at page level**: Fetch data in server pages or layouts, pass as props to client components
+- **Use cache directive**: For static/cached pages, add `"use cache"` directive at top:
 
   ```typescript
-  // server-component.tsx (no directive)
-  async function DataContainer() {
+  "use cache";
+
+  export default async function CachedPage() {
     const data = await fetchData();
-    return <ClientDisplay data={data} />;
-  }
-
-  // client-component.tsx
-  "use client";
-  export function ClientDisplay({ data }) {
-    const [filter, setFilter] = useState("");
-    return <div>{/* render with filter state */}</div>;
+    return <div>{/* content */}</div>;
   }
   ```
 
-## Testing Requirements
+## Layout Composition
 
-- Each component at `src/components/` should have corresponding tests in `src/components/__tests__/`
-- Test user interactions, not implementation details
-- Use `@testing-library/react` for component testing
-- Minimum coverage: 80% for components
-- Test accessibility features (`aria-*` attributes, keyboard navigation)
+- **Root layout** (`app/layout.tsx`): Global styles, metadata, providers (auth, themes)
+- **Segment layouts**: Create `layout.tsx` in feature folders to define UI boundaries
+- **Use metadata**: Define page titles and descriptions:
+  ```typescript
+  export const metadata = {
+    title: "Feature Name",
+    description: "Feature description",
+  };
+  ```
+- **Providers in layout**: Database clients, auth, analytics—place in layout
+- **Dynamic segments**: Use `[param]` for dynamic routes (e.g., `[id]/page.tsx`)
+
+## Client vs Server Page Boundaries
+
+- **Default to server**: Pages are server components by default
+- **Mark interactive pages with "use client"**: Only when page needs user interaction
+- **Data fetching in server pages**: Use `async` functions to fetch data
+- **Pass data down**: Fetch at page level, pass to child client components as props
+- **Avoid prop drilling**: Use layout wrapping for shared state instead
+- Pattern example:
+
+  ```typescript
+  // app/posts/page.tsx (server)
+  async function Page() {
+    const posts = await fetchPosts();
+    return <PostList initialPosts={posts} />;
+  }
+
+  // src/components/PostList.tsx (client if interactive)
+  "use client";
+  export function PostList({ initialPosts }) {
+    const [filter, setFilter] = useState("");
+    return <div>{/* filtered view */}</div>;
+  }
+  ```
 
 ## Accessibility (a11y)
 
@@ -71,174 +72,101 @@ Rules specific to React components in the `src/components/` directory. These rul
 - Test keyboard navigation: Tab, Enter, Escape should all work
 - Use `aria-live` for dynamic content updates
 
-## Styling in Components
+## Styling in Pages
 
 - Use Tailwind CSS utility classes exclusively via `className` prop
-- **NO inline styles** with `style` prop (except for dynamic values unavoidable with CSS-in-JS)
+- **NO inline styles** with `style` prop (except for dynamic values)
 - **WHITE THEME ONLY**: Never use `dark:` prefix
-- Accept `className` in Props and merge with component defaults:
+- Follow this color scheme:
+  - Backgrounds: `bg-white`, `bg-gray-50`, `bg-blue-50`
+  - Text: `text-gray-900`, `text-gray-700`, `text-blue-600`
+  - Borders: `border-gray-200`, `border-blue-200`
+- Use consistent spacing: `p-4`, `gap-3`, `mt-6` (Tailwind default scale)
+
+## Performance Optimization
+
+- Use `"use cache"` directive for static pages
+- Implement cache invalidation with `revalidateTag()` for dynamic data
+- Lazy load heavy sections with `React.lazy()` + `Suspense`
+- Use Next.js Image component for images (not `<img>`)
+- Prefetch critical pages with `<Link prefetch>`
+- Monitor Core Web Vitals: LCP, FID, CLS
+
+## Error Handling for Pages
+
+- Create `error.tsx` in page folder for error boundaries
+- Create `not-found.tsx` for 404 pages
+- Create `loading.tsx` for Suspense fallbacks
+- Provide user-friendly error messages
+- Log errors for debugging
+- Pattern:
   ```typescript
-  export function Button({ className, ...props }: Props) {
+  // app/posts/error.tsx
+  "use client";
+  export default function Error({ error, reset }) {
     return (
-      <button
-        className={`px-4 py-2 bg-blue-600 text-white rounded ${className}`}
-        {...props}
-      />
+      <div className="p-8">
+        <h2 className="text-xl font-bold text-red-600">Error loading posts</h2>
+        <button onClick={reset}>Try again</button>
+      </div>
     );
   }
   ```
-- Use consistent spacing: `p-4`, `gap-3`, `mt-6` (stick to Tailwind default scale)
 
-## Performance
+## Testing Requirements
 
-- Avoid unnecessary re-renders with proper dependency arrays in `useEffect`
-- Lazy load heavy components with `React.lazy()` + `Suspense` for route-level code splitting
-- Don't destructure deeply nested objects in function signatures—destructure inside function
-- Check React DevTools Profiler for unexpected rerenders before optimizing
+- Page components should have integration tests in `__tests__/` folder
+- Test user workflows and page interactions, not implementation details
+- Use `@testing-library/react` for testing page rendering and interactions
+- Minimum coverage: 70% for pages
+- Test accessibility features and keyboard navigation across pages
 
-## Error Handling
+## Documentation for Pages
 
-- Wrap async operations with try-catch and display error state
-- Provide user-friendly error messages (no stack traces in UI)
-- Don't silently swallow errors—log to console in development
-- Create Error Boundary wrapper for fatal component errors
-
-## Documentation
-
-- Add JSDoc comments to complex components:
+- Add JSDoc comments to data fetching functions:
   ```typescript
   /**
-   * Renders a paginated list with filter options.
-   * @param items - Array of data to display
-   * @param onSelect - Callback when item is selected
+   * Fetch all published posts
+   * @param limit - Number of posts to fetch (default: 10)
+   * @returns Array of posts with title and content
    */
-  export function List({ items, onSelect }: Props) {}
+  async function fetchPosts(limit = 10) {}
   ```
-- Document non-obvious props in the interface definition
-- Link to design system or component storybook if available
+- Document page purpose in comments if non-obvious
+- Link to design system in layout
 
 ## Naming Conventions
 
-- Component files: PascalCase (`Button.tsx`, `UserCard.tsx`)
-- Component functions: PascalCase matching filename
-- Props interfaces: `{ComponentName}Props` (e.g., `ButtonProps`)
-- Event handlers: `handle{EventName}` (e.g., `handleClick`, `handleSubmit`)
-- Boolean props: prefix with `is` or `has` (e.g., `isDisabled`, `hasIcon`)
+- Page files: Always `page.tsx` in feature folder
+- Layout files: Always `layout.tsx`
+- Error boundaries: `error.tsx`
+- Not found: `not-found.tsx`
+- Loading: `loading.tsx`
+- Route handlers: `route.ts` (not .tsx)
+- Feature folders: kebab-case (e.g., `cache-components`, `react-19`)
 
-## Import Organization
-
-```typescript
-// 1. React imports
-import { useState, useEffect, ReactNode } from "react";
-
-// 2. Third-party imports
-import clsx from "clsx";
-
-// 3. Internal components
-import { Button } from ".";
-import { useTheme } from "@/hooks";
-
-// 4. Utilities & constants
-import { formatDate } from "@/utils";
-
-// 5. Styles (if separate file)
-import styles from "./Component.module.css";
-```
-
-## File Organization
+## File Organization for Pages
 
 ```
-src/components/
-├── common/                   # Reusable UI components
-│   ├── Button.tsx
-│   ├── Card.tsx
-│   └── Modal.tsx
-├── layout/                   # Layout wrapper components
-│   ├── Header.tsx
-│   ├── Sidebar.tsx
-│   └── Footer.tsx
-├── features/                 # Feature-specific components
-│   ├── UserProfile/
-│   │   ├── UserCard.tsx
-│   │   └── UserForm.tsx
-│   └── Settings/
-│       └── SettingsPanel.tsx
-├── __tests__/                # Component tests
-│   └── Button.test.tsx
-└── index.ts                  # Named exports for directory
+app/
+├── layout.tsx                    # Root layout
+├── page.tsx                      # Homepage
+├── globals.css
+├── feature-name/
+│   ├── layout.tsx               # Feature segment layout
+│   ├── page.tsx                 # Feature page
+│   ├── error.tsx                # Error boundary
+│   ├── loading.tsx              # Suspense fallback
+│   └── [id]/
+│       └── page.tsx             # Dynamic route
+└── api/
+    └── endpoint/
+        └── route.ts             # API handler
 ```
 
-## Common Pitfalls to Avoid
+**Key points:**
 
-❌ **DON'T**:
-
-- Create components that do too much (violates SRP)
-- Use `any` type for props—always define Props interface
-- Access DOM directly with `ref` when possible to use uncontrolled components
-- Create new objects/arrays on every render without memoization
-- Use index as key in lists—use unique, stable identifiers
-
-✅ **DO**:
-
-- Keep components small and composable (< 300 lines ideally)
-- Use TypeScript strict mode—define all prop types explicitly
-- Lift state only when multiple components need it
-- Use the `as` prop pattern for polymorphic components
-- Return null or fragment for optional rendering, not empty string
-
-## Examples
-
-### Simple Component
-
-```typescript
-interface ButtonProps {
-  label: string;
-  onClick: () => void;
-  variant?: "primary" | "secondary";
-  disabled?: boolean;
-}
-
-export function Button({
-  label,
-  onClick,
-  variant = "primary",
-  disabled = false,
-}: ButtonProps) {
-  const baseStyles = "px-4 py-2 rounded font-semibold transition";
-  const variantStyles =
-    variant === "primary"
-      ? "bg-blue-600 text-white hover:bg-blue-700"
-      : "bg-gray-200 text-gray-900 hover:bg-gray-300";
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyles} ${variantStyles} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-    >
-      {label}
-    </button>
-  );
-}
-```
-
-### Container/Presentation Split
-
-```typescript
-// ProfileContainer.tsx - server component for data
-async function ProfileContainer({ userId }: { userId: string }) {
-  const user = await fetchUser(userId);
-  return <ProfileCard user={user} />;
-}
-
-// ProfileCard.tsx - client component for interaction
-"use client";
-interface ProfileCardProps {
-  user: User;
-}
-
-export function ProfileCard({ user }: ProfileCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  return <div>{/* render with edit state */}</div>;
-}
-```
+- Each folder = URL segment
+- `page.tsx` defines the route
+- `layout.tsx` wraps pages in that segment
+- Use `[param]` for dynamic segments
