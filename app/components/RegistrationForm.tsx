@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import type {
+  ValidationError,
+  ErrorResponse,
+  RegisterSuccessResponse,
+} from "@/app/types/register";
 
 interface FormState {
   name: string;
@@ -15,26 +20,6 @@ interface Errors {
   password?: string;
 }
 
-interface ValidationErrorResponse {
-  field: string;
-  message: string;
-}
-
-interface RegisterResponse {
-  success: true;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: string;
-  };
-}
-
-interface ErrorResponse {
-  error: string;
-  details?: ValidationErrorResponse[];
-}
-
 export default function RegistrationForm() {
   const [form, setForm] = useState<FormState>({
     name: "",
@@ -43,6 +28,7 @@ export default function RegistrationForm() {
   });
 
   const [errors, setErrors] = useState<Errors>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -67,36 +53,48 @@ export default function RegistrationForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    setSuccess(false);
+    setFormError(null);
 
     // Real-time validation
     const newErrors = { ...errors };
-    
-    if (name === "name" && value) {
-      const nameError = validateName(value);
-      if (nameError) {
-        newErrors.name = nameError;
-      } else {
+
+    if (name === "name") {
+      if (!value) {
         delete newErrors.name;
+      } else {
+        const nameError = validateName(value);
+        if (nameError) {
+          newErrors.name = nameError;
+        } else {
+          delete newErrors.name;
+        }
       }
     }
-    
-    if (name === "email" && value) {
-      if (!validateEmail(value)) {
+
+    if (name === "email") {
+      if (!value) {
+        delete newErrors.email;
+      } else if (!validateEmail(value)) {
         newErrors.email = "Invalid email format";
       } else {
         delete newErrors.email;
       }
     }
-    
-    if (name === "password" && value) {
-      const passwordError = validatePassword(value);
-      if (passwordError) {
-        newErrors.password = passwordError;
-      } else {
+
+    if (name === "password") {
+      if (!value) {
         delete newErrors.password;
+      } else {
+        const passwordError = validatePassword(value);
+        if (passwordError) {
+          newErrors.password = passwordError;
+        } else {
+          delete newErrors.password;
+        }
       }
     }
-    
+
     setErrors(newErrors);
   };
 
@@ -133,6 +131,7 @@ export default function RegistrationForm() {
     }
 
     setIsLoading(true);
+    setFormError(null);
     try {
       const response = await fetch("/api/register", {
         method: "POST",
@@ -141,7 +140,7 @@ export default function RegistrationForm() {
       });
 
       if (response.ok) {
-        const data: RegisterResponse = await response.json();
+        const data: RegisterSuccessResponse = await response.json();
         setSuccess(true);
         setForm({ name: "", email: "", password: "" });
         setErrors({});
@@ -154,18 +153,16 @@ export default function RegistrationForm() {
         const data: ErrorResponse = await response.json();
         if (data.details) {
           const fieldErrors: Errors = {};
-          data.details.forEach((error) => {
+          data.details.forEach((error: ValidationError) => {
             fieldErrors[error.field as keyof Errors] = error.message;
           });
           setErrors(fieldErrors);
         } else {
-          setErrors({ email: data.error });
+          setFormError(data.error);
         }
       }
     } catch (error) {
-      setErrors({
-        email: "Registration failed. Please check your connection and try again.",
-      });
+      setFormError("Registration failed. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -192,13 +189,23 @@ export default function RegistrationForm() {
                   Check your email for activation instructions.
                 </p>
                 <Link
-                  href="/login"
+                  href="/"
                   className="text-green-600 hover:text-green-700 hover:underline text-sm mt-2 inline-block font-medium"
                 >
-                  Go to Login →
+                  Go to Home →
                 </Link>
               </div>
             </div>
+          </div>
+        )}
+
+        {formError && (
+          <div
+            className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
+            role="alert"
+            aria-live="assertive"
+          >
+            <p className="text-red-800 text-sm">{formError}</p>
           </div>
         )}
 

@@ -1,31 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Type definitions
-interface RegisterRequestBody {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface ValidationError {
-  field: string;
-  message: string;
-}
-
-interface ErrorResponse {
-  error: string;
-  details?: ValidationError[];
-}
-
-interface SuccessResponse {
-  success: true;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: string;
-  };
-}
+import type {
+  RegisterRequestBody,
+  ValidationError,
+  ErrorResponse,
+  RegisterSuccessResponse,
+} from "@/app/types/register";
 
 // Simulated database (in real app, use actual database)
 const users = new Map<
@@ -97,10 +76,11 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     const validationErrors: ValidationError[] = [];
 
-    if (!body.name) {
+    const trimmedName = body.name ? body.name.trim() : "";
+    if (!trimmedName) {
       validationErrors.push({ field: "name", message: "Name is required" });
     } else {
-      const nameValidation = validateName(body.name);
+      const nameValidation = validateName(trimmedName);
       if (!nameValidation.valid) {
         validationErrors.push({
           field: "name",
@@ -157,7 +137,7 @@ export async function POST(request: NextRequest) {
     const userId = crypto.randomUUID();
     const newUser = {
       id: userId,
-      name: body.name.trim(),
+      name: trimmedName,
       email: emailLower,
       password: hashedPassword,
     };
@@ -166,7 +146,7 @@ export async function POST(request: NextRequest) {
     users.set(emailLower, newUser);
 
     // Return success response (exclude password)
-    return NextResponse.json<SuccessResponse>(
+    return NextResponse.json<RegisterSuccessResponse>(
       {
         success: true,
         user: {
