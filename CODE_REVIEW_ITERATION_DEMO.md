@@ -84,7 +84,7 @@ const [success, setSuccess] = useState(false);
 ### Comment 1: Missing Name Validation
 **Priority**: 🔴 Blocker
 
-> The server validates name as 2-50 characters (`src/app/api/register/route.ts` line 82-88).  
+> The server validates name as 2-50 characters (`app/api/register/route.ts` line 82-88).  
 > The form should validate the same constraints **before** submitting.
 >
 > **Current**: No validation  
